@@ -349,3 +349,18 @@ void buscar_logs(char termo[]) {
         printf("Nenhum log contem o termo \"%s\".\n", termo);
     }
 }
+/* Monta uma senha aleatoria sorteando caracteres de um "banco"
+ * que mistura maiusculas, minusculas, numeros e simbolos.
+ * Usa apenas rand(), modulo (%) e indexacao de vetor. */
+void gerar_senha_segura(int tamanho, char saida[]) {
+    char banco[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%&*";
+    int tamanho_banco = (int) strlen(banco);
+    int i;
+    int indice;
+
+    for (i = 0; i < tamanho; i++) {
+        indice = rand() % tamanho_banco; // sorteia uma posicao do banco 
+        saida[i] = banco[indice];
+    }
+    saida[tamanho] = '\0';
+}
