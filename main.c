@@ -67,3 +67,103 @@ int main(void) {
         printf("Escolha uma opcao: ");
         scanf("%d", &opcao);
         limpar_entrada();
+
+        switch (opcao) {
+
+            case 1:
+                printf("Digite o dado sensivel (ex: CPF, cartao): ");
+                ler_string(texto, TAM_BUFFER);
+                mascarar_dados(texto);
+                printf("Dado mascarado: %s\n", texto);
+                registrar_log(texto, "Mascaramento");
+                break;
+
+            case 2:
+                printf("Digite a senha: ");
+                ler_string(texto, TAM_BUFFER);
+                validar_senha(texto);
+                registrar_log("Verificacao de senha realizada", "Validacao");
+                break;
+
+            case 3:
+                printf("Digite o texto: ");
+                ler_string(texto, TAM_BUFFER);
+                printf("Digite o deslocamento (ex: 3): ");
+                scanf("%d", &deslocamento);
+                limpar_entrada();
+                cifrar_cesar(texto, deslocamento, saida);
+                printf("Texto cifrado: %s\n", saida);
+                registrar_log(saida, "Cesar");
+                break;
+
+            case 4:
+                printf("Digite o texto cifrado: ");
+                ler_string(texto, TAM_BUFFER);
+                printf("Digite o deslocamento usado: ");
+                scanf("%d", &deslocamento);
+                limpar_entrada();
+                descifrar_cesar(texto, deslocamento, saida);
+                printf("Texto decifrado: %s\n", saida);
+                break;
+
+            case 5:
+                printf("Digite o texto: ");
+                ler_string(texto, TAM_BUFFER);
+                printf("Digite a chave (1 caractere): ");
+                scanf(" %c", &chave);
+                limpar_entrada();
+                cifrar_xor(texto, chave);
+                break;
+
+            case 6:
+                if (xor_tamanho == 0) {
+                    printf("Nenhum texto foi cifrado com XOR ainda. Use a opcao 5 primeiro.\n");
+                    break;
+                }
+                printf("Digite a chave usada para cifrar: ");
+                scanf(" %c", &chave);
+                limpar_entrada();
+                decifrar_xor(chave, saida);
+                printf("Texto decifrado: %s\n", saida);
+                break;
+
+            case 7:
+                printf("Quantos caracteres a senha deve ter (minimo 8)? ");
+                scanf("%d", &tamanho_senha);
+                limpar_entrada();
+
+                if (tamanho_senha < 8) {
+                    printf("Escolha pelo menos 8 caracteres para uma senha segura.\n");
+                    break;
+                }
+                if (tamanho_senha > TAM_BUFFER - 1) {
+                    tamanho_senha = TAM_BUFFER - 1;
+                }
+
+                gerar_senha_segura(tamanho_senha, saida);
+                printf("Senha gerada: %s\n", saida);
+                validar_senha(saida); // confere senha
+                registrar_log(saida, "Gerador de Senha");
+                break;
+
+            case 8:
+                listar_logs();
+                break;
+
+            case 9:
+                printf("Digite o termo a buscar: ");
+                ler_string(termo, TAM_BUFFER);
+                buscar_logs(termo);
+                break;
+
+            case 0:
+                printf("Encerrando o SafeConsole. Ate mais!\n");
+                break;
+
+            default:
+                printf("Opcao invalida!\n");
+        }
+    } while (opcao != 0);
+
+    return 0;
+}
