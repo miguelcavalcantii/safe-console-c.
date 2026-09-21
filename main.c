@@ -234,3 +234,71 @@ int validar_senha(char senha[]) {
     printf("Senha valida! Atende a todos os requisitos.\n");
     return 1;
 }
+void cifrar_cesar(char texto[], int deslocamento, char saida[]) {
+    int tamanho = (int) strlen(texto);
+    int i;
+    int c;
+
+    /* transforma qualquer deslocamento (negativo ou grande) em um
+     * valor equivalente entre 0 e 25 */
+    while (deslocamento < 0) {
+        deslocamento = deslocamento + 26;
+    }
+    deslocamento = deslocamento % 26;
+
+    for (i = 0; i < tamanho; i++) {
+        c = texto[i]; /* usamos "int" para a conta nao estourar o char */
+
+        if (c >= 'A' && c <= 'Z') {
+            c = c + deslocamento;
+            if (c > 'Z') {
+                c = c - 26;
+            }
+        } else if (c >= 'a' && c <= 'z') {
+            c = c + deslocamento;
+            if (c > 'z') {
+                c = c - 26;
+            }
+        }
+
+        saida[i] = (char) c;
+    }
+    saida[tamanho] = '\0';
+}
+
+// só cifra com o deslocamento invertido
+void descifrar_cesar(char texto[], int deslocamento, char saida[]) {
+    cifrar_cesar(texto, -deslocamento, saida);
+}
+
+//mostrado em hexadecimal
+void cifrar_xor(char texto[], char chave) {
+    int tamanho = (int) strlen(texto);
+    int i;
+    char hex_log[TAM_BUFFER] = ""; 
+    char par[3];                  
+
+    printf("Texto cifrado (em hexadecimal): ");
+    for (i = 0; i < tamanho; i++) {
+        xor_cifrado[i] = (unsigned char) texto[i] ^ (unsigned char) chave;
+        printf("%02X", xor_cifrado[i]);
+
+        sprintf(par, "%02X", xor_cifrado[i]);
+        strcat(hex_log, par); //cola o par de caracteres no final de hex_log
+    }
+    printf("\n");
+
+    xor_tamanho = tamanho;
+    registrar_log(hex_log, "XOR");
+}
+
+/* O XOR e simetrico: aplicar a mesma operacao com a mesma chave
+ * devolve o texto original. Por isso usamos o vetor ja cifrado
+ * (xor_cifrado) em vez de pedir o hexadecimal de novo. */
+void decifrar_xor(char chave, char saida[]) {
+    int i;
+    for (i = 0; i < xor_tamanho; i++) {
+        saida[i] = (char) (xor_cifrado[i] ^ (unsigned char) chave);
+    }
+    saida[xor_tamanho] = '\0';
+}
