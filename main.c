@@ -302,3 +302,50 @@ void decifrar_xor(char chave, char saida[]) {
     }
     saida[xor_tamanho] = '\0';
 }
+// Guarda uma mensagem processada e o algoritmo usado
+void registrar_log(char mensagem[], char algoritmo[]) {
+    if (total_logs >= MAX_LOGS) {
+        printf("Aviso: limite de %d logs atingido.\n", MAX_LOGS);
+        return;
+    }
+
+    strcpy(historico[total_logs], mensagem);
+    strcpy(algoritmos[total_logs], algoritmo);
+    tamanhos[total_logs] = (int) strlen(mensagem);
+
+    total_logs++;
+}
+
+/* Mostra o relatorio de auditoria: ID, tamanho, algoritmo e payload
+ * de cada log guardado na matriz. */
+void listar_logs(void) {
+    int i;
+
+    if (total_logs == 0) {
+        printf("Nenhum log registrado ainda.\n");
+        return;
+    }
+
+    printf("\n%-4s %-16s %-6s %s\n", "ID", "Algoritmo", "Tam.", "Payload");
+    printf("--------------------------------------------------\n");
+    for (i = 0; i < total_logs; i++) {
+        printf("%-4d %-16s %-6d %s\n", i + 1, algoritmos[i], tamanhos[i], historico[i]);
+    }
+}
+
+// Procura um termo dentro dos logs guardados, usando strstr(). 
+void buscar_logs(char termo[]) {
+    int i;
+    int encontrados = 0;
+
+    for (i = 0; i < total_logs; i++) {
+        if (strstr(historico[i], termo) != NULL) {
+            printf("[Log %d] Algoritmo: %s | Payload: %s\n", i + 1, algoritmos[i], historico[i]);
+            encontrados++;
+        }
+    }
+
+    if (encontrados == 0) {
+        printf("Nenhum log contem o termo \"%s\".\n", termo);
+    }
+}
