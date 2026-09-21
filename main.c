@@ -34,5 +34,5 @@ void registrar_log(char mensagem[], char algoritmo[]);
 void listar_logs(void);
 void buscar_logs(char termo[]);
 
-//funcao extra
+//funcao extra 1 
 void gerar_senha_segura(int tamanho, char saida[]);
