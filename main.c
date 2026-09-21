@@ -167,3 +167,18 @@ int main(void) {
 
     return 0;
 }
+// etapa 1 fgets tirando linha
+void ler_string(char texto[], int tamanho) {
+    fgets(texto, tamanho, stdin);
+
+    int i = (int) strlen(texto) - 1;
+    if (i >= 0 && texto[i] == '\n') {
+        texto[i] = '\0';
+    }
+}
+void limpar_entrada(void) {
+    int c;
+    while ((c = getchar()) != '\n' && c != EOF) {
+        //descarta caracteres restantes
+    }
+}
