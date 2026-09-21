@@ -182,3 +182,55 @@ void limpar_entrada(void) {
         //descarta caracteres restantes
     }
 }
+/* Substitui todos os caracteres por '*', exceto os 4 ultimos.
+ * A troca e feita direto na propria string. */
+void mascarar_dados(char texto[]) {
+    int tamanho = (int) strlen(texto);
+    int i;
+
+    /* se a string tiver 4 caracteres ou menos, nada e mascarado */
+    for (i = 0; i < tamanho - 4; i++) {
+        texto[i] = '*';
+    }
+}
+
+// etapa 1 - verifica se a senha contem todos os requisitos
+int validar_senha(char senha[]) {
+    int tamanho = (int) strlen(senha);
+    int tem_maiuscula = 0;
+    int tem_minuscula = 0;
+    int tem_numero = 0;
+    int i;
+
+    for (i = 0; i < tamanho; i++) {
+        char c = senha[i];
+
+        if (c >= 'A' && c <= 'Z') {
+            tem_maiuscula = 1;
+        } else if (c >= 'a' && c <= 'z') {
+            tem_minuscula = 1;
+        } else if (c >= '0' && c <= '9') {
+            tem_numero = 1;
+        }
+    }
+
+    if (tamanho < 8) {
+        printf("Senha invalida: precisa ter no minimo 8 caracteres.\n");
+        return 0;
+    }
+    if (tem_maiuscula == 0) {
+        printf("Senha invalida: falta pelo menos 1 letra maiuscula.\n");
+        return 0;
+    }
+    if (tem_minuscula == 0) {
+        printf("Senha invalida: falta pelo menos 1 letra minuscula.\n");
+        return 0;
+    }
+    if (tem_numero == 0) {
+        printf("Senha invalida: falta pelo menos 1 numero.\n");
+        return 0;
+    }
+
+    printf("Senha valida! Atende a todos os requisitos.\n");
+    return 1;
+}
