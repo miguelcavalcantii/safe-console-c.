@@ -364,3 +364,59 @@ void gerar_senha_segura(int tamanho, char saida[]) {
     }
     saida[tamanho] = '\0';
 }
+
+void mostrar_forca_visual(char senha[]) {
+    int tamanho = (int) strlen(senha);
+    int tem_maiuscula = 0;
+    int tem_minuscula = 0;
+    int tem_numero = 0;
+    int tem_simbolo = 0;
+    int pontos = 0;
+    int i;
+
+    for (i = 0; i < tamanho; i++) {
+        int codigo = senha[i];
+
+        if (codigo >= 65 && codigo <= 90) {
+            tem_maiuscula = 1;
+        } else if (codigo >= 97 && codigo <= 122) {
+            tem_minuscula = 1;
+        } else if (codigo >= 48 && codigo <= 57) {
+            tem_numero = 1;
+        } else {
+            tem_simbolo = 1;
+        }
+    }
+
+    if (tamanho >= 8)  pontos++;
+    if (tem_maiuscula) pontos++;
+    if (tem_minuscula) pontos++;
+    if (tem_numero)    pontos++;
+    if (tem_simbolo)   pontos++;
+
+    printf("Forca da senha: [");
+    for (i = 0; i < 5; i++) {
+        if (i < pontos) {
+            printf("#");
+        } else {
+            printf("-");
+        }
+    }
+    printf("] (%d de 5)\n", pontos);
+}
+
+int senha_tem_sequencia(char senha[]) {
+    int tamanho = (int) strlen(senha);
+    int i;
+
+    for (i = 0; i < tamanho - 2; i++) {
+        char a = senha[i];
+        char b = senha[i + 1];
+        char c = senha[i + 2];
+
+        if ((b == a + 1 && c == a + 2) || (b == a && c == a)) {
+            return 1;
+        }
+    }
+    return 0;
+}
