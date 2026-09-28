@@ -3,11 +3,10 @@
 #include <stdlib.h>
 #include <time.h>
 
-#define TAM_BUFFER 256   /* tamanho maximo de uma string digitada pelo usuario */
-#define MAX_LOGS   20    /* quantidade maxima de logs guardados em memoria    */
-#define TAM_ALGO   25    /* tamanho maximo do nome do algoritmo no log        */
+#define TAM_BUFFER 256
+#define MAX_LOGS   20
+#define TAM_ALGO   25
 
-//guarda ultimo texto cifrado
 unsigned char xor_cifrado[TAM_BUFFER];
 int xor_tamanho = 0;
 
@@ -15,42 +14,37 @@ char historico[MAX_LOGS][TAM_BUFFER];
 char algoritmos[MAX_LOGS][TAM_ALGO];
 int  tamanhos[MAX_LOGS];
 int  total_logs = 0;
-//prototipos
+
 void ler_string(char texto[], int tamanho);
 void limpar_entrada(void);
 
-//1
 void mascarar_dados(char texto[]);
 int  validar_senha(char senha[]);
 
-//2
 void cifrar_cesar(char texto[], int deslocamento, char saida[]);
 void descifrar_cesar(char texto[], int deslocamento, char saida[]);
 void cifrar_xor(char texto[], char chave);
 void decifrar_xor(char chave, char saida[]);
 
-//3
 void registrar_log(char mensagem[], char algoritmo[]);
 void listar_logs(void);
-void buscar_logs(char termo[]);
 
-//funcao extra 1 
 void gerar_senha_segura(int tamanho, char saida[]);
+void mostrar_forca_visual(char senha[]);
+int  senha_tem_sequencia(char senha[]);
 
 int main(void) {
     int opcao;
     char texto[TAM_BUFFER];
     char saida[TAM_BUFFER];
-    char termo[TAM_BUFFER];
     int deslocamento;
     int tamanho_senha;
     char chave;
 
-    srand((unsigned int) time(NULL)); // embaralha o gerador aleatorio uma unica vez 
-
-    printf("========================================\n");
+    srand((unsigned int) time(NULL));
+    // começo do menu
     printf("      SAFECONSOLE C - Seguranca\n");
-    printf("========================================\n");
+    printf("      Aluno: Miguel B. Cavalcanti\n");
 
     do {
         printf("\n--------- MENU ---------\n");
@@ -62,7 +56,6 @@ int main(void) {
         printf("6. Decifrar com XOR\n");
         printf("7. Gerar senha segura (extra)\n");
         printf("8. Ver logs de auditoria\n");
-        printf("9. Buscar termo nos logs\n");
         printf("0. Sair\n");
         printf("Escolha uma opcao: ");
         scanf("%d", &opcao);
@@ -82,6 +75,10 @@ int main(void) {
                 printf("Digite a senha: ");
                 ler_string(texto, TAM_BUFFER);
                 validar_senha(texto);
+                mostrar_forca_visual(texto);
+                if (senha_tem_sequencia(texto)) {
+                    printf("Atencao: a senha contem uma sequencia previsivel (ex: 123, abc, aaa).\n");
+                }
                 registrar_log("Verificacao de senha realizada", "Validacao");
                 break;
 
@@ -142,18 +139,13 @@ int main(void) {
 
                 gerar_senha_segura(tamanho_senha, saida);
                 printf("Senha gerada: %s\n", saida);
-                validar_senha(saida); // confere senha
+                validar_senha(saida);
+                mostrar_forca_visual(saida);
                 registrar_log(saida, "Gerador de Senha");
                 break;
 
             case 8:
                 listar_logs();
-                break;
-
-            case 9:
-                printf("Digite o termo a buscar: ");
-                ler_string(termo, TAM_BUFFER);
-                buscar_logs(termo);
                 break;
 
             case 0:
@@ -167,7 +159,7 @@ int main(void) {
 
     return 0;
 }
-// etapa 1 fgets tirando linha
+
 void ler_string(char texto[], int tamanho) {
     fgets(texto, tamanho, stdin);
 
@@ -176,25 +168,22 @@ void ler_string(char texto[], int tamanho) {
         texto[i] = '\0';
     }
 }
+
 void limpar_entrada(void) {
     int c;
     while ((c = getchar()) != '\n' && c != EOF) {
-        //descarta caracteres restantes
     }
 }
-/* Substitui todos os caracteres por '*', exceto os 4 ultimos.
- * A troca e feita direto na propria string. */
+
 void mascarar_dados(char texto[]) {
     int tamanho = (int) strlen(texto);
     int i;
 
-    /* se a string tiver 4 caracteres ou menos, nada e mascarado */
     for (i = 0; i < tamanho - 4; i++) {
         texto[i] = '*';
     }
 }
 
-// etapa 1 - verifica se a senha contem todos os requisitos
 int validar_senha(char senha[]) {
     int tamanho = (int) strlen(senha);
     int tem_maiuscula = 0;
@@ -203,13 +192,13 @@ int validar_senha(char senha[]) {
     int i;
 
     for (i = 0; i < tamanho; i++) {
-        char c = senha[i];
+        int codigo = senha[i];
 
-        if (c >= 'A' && c <= 'Z') {
+        if (codigo >= 65 && codigo <= 90) {
             tem_maiuscula = 1;
-        } else if (c >= 'a' && c <= 'z') {
+        } else if (codigo >= 97 && codigo <= 122) {
             tem_minuscula = 1;
-        } else if (c >= '0' && c <= '9') {
+        } else if (codigo >= 48 && codigo <= 57) {
             tem_numero = 1;
         }
     }
@@ -234,20 +223,19 @@ int validar_senha(char senha[]) {
     printf("Senha valida! Atende a todos os requisitos.\n");
     return 1;
 }
+
 void cifrar_cesar(char texto[], int deslocamento, char saida[]) {
     int tamanho = (int) strlen(texto);
     int i;
     int c;
 
-    /* transforma qualquer deslocamento (negativo ou grande) em um
-     * valor equivalente entre 0 e 25 */
     while (deslocamento < 0) {
         deslocamento = deslocamento + 26;
     }
     deslocamento = deslocamento % 26;
 
     for (i = 0; i < tamanho; i++) {
-        c = texto[i]; /* usamos "int" para a conta nao estourar o char */
+        c = texto[i];
 
         if (c >= 'A' && c <= 'Z') {
             c = c + deslocamento;
@@ -266,17 +254,15 @@ void cifrar_cesar(char texto[], int deslocamento, char saida[]) {
     saida[tamanho] = '\0';
 }
 
-// só cifra com o deslocamento invertido
 void descifrar_cesar(char texto[], int deslocamento, char saida[]) {
     cifrar_cesar(texto, -deslocamento, saida);
 }
 
-//mostrado em hexadecimal
 void cifrar_xor(char texto[], char chave) {
     int tamanho = (int) strlen(texto);
     int i;
-    char hex_log[TAM_BUFFER] = ""; 
-    char par[3];                  
+    char hex_log[TAM_BUFFER] = "";
+    char par[3];
 
     printf("Texto cifrado (em hexadecimal): ");
     for (i = 0; i < tamanho; i++) {
@@ -284,7 +270,7 @@ void cifrar_xor(char texto[], char chave) {
         printf("%02X", xor_cifrado[i]);
 
         sprintf(par, "%02X", xor_cifrado[i]);
-        strcat(hex_log, par); //cola o par de caracteres no final de hex_log
+        strcat(hex_log, par);
     }
     printf("\n");
 
@@ -292,9 +278,6 @@ void cifrar_xor(char texto[], char chave) {
     registrar_log(hex_log, "XOR");
 }
 
-/* O XOR e simetrico: aplicar a mesma operacao com a mesma chave
- * devolve o texto original. Por isso usamos o vetor ja cifrado
- * (xor_cifrado) em vez de pedir o hexadecimal de novo. */
 void decifrar_xor(char chave, char saida[]) {
     int i;
     for (i = 0; i < xor_tamanho; i++) {
@@ -302,7 +285,7 @@ void decifrar_xor(char chave, char saida[]) {
     }
     saida[xor_tamanho] = '\0';
 }
-// Guarda uma mensagem processada e o algoritmo usado
+
 void registrar_log(char mensagem[], char algoritmo[]) {
     if (total_logs >= MAX_LOGS) {
         printf("Aviso: limite de %d logs atingido.\n", MAX_LOGS);
@@ -316,8 +299,6 @@ void registrar_log(char mensagem[], char algoritmo[]) {
     total_logs++;
 }
 
-/* Mostra o relatorio de auditoria: ID, tamanho, algoritmo e payload
- * de cada log guardado na matriz. */
 void listar_logs(void) {
     int i;
 
@@ -333,25 +314,6 @@ void listar_logs(void) {
     }
 }
 
-// Procura um termo dentro dos logs guardados, usando strstr(). 
-void buscar_logs(char termo[]) {
-    int i;
-    int encontrados = 0;
-
-    for (i = 0; i < total_logs; i++) {
-        if (strstr(historico[i], termo) != NULL) {
-            printf("[Log %d] Algoritmo: %s | Payload: %s\n", i + 1, algoritmos[i], historico[i]);
-            encontrados++;
-        }
-    }
-
-    if (encontrados == 0) {
-        printf("Nenhum log contem o termo \"%s\".\n", termo);
-    }
-}
-/* Monta uma senha aleatoria sorteando caracteres de um "banco"
- * que mistura maiusculas, minusculas, numeros e simbolos.
- * Usa apenas rand(), modulo (%) e indexacao de vetor. */
 void gerar_senha_segura(int tamanho, char saida[]) {
     char banco[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%&*";
     int tamanho_banco = (int) strlen(banco);
@@ -359,7 +321,7 @@ void gerar_senha_segura(int tamanho, char saida[]) {
     int indice;
 
     for (i = 0; i < tamanho; i++) {
-        indice = rand() % tamanho_banco; // sorteia uma posicao do banco 
+        indice = rand() % tamanho_banco;
         saida[i] = banco[indice];
     }
     saida[tamanho] = '\0';
